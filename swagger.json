@@ -1,0 +1,811 @@
+{
+"openapi": "3.0.0",
+"info": {
+"title": "API REST - Biblioteca",
+"version": "1.0.0",
+"description": "API REST desenvolvida para gerenciamento de usuários, livros e empréstimos. O projeto foi estruturado utilizando como base o modelo disponibilizado pelo professor Tassio durante as aulas gravadas.\n\nA lógica do projeto, principalmente nas pastas controllers e data, foi organizada para permitir a construção de um padrão genérico e repetível utilizando o nome do recurso. Dessa forma, é possível adicionar novos recursos de maneira simples e rápida, maximizando a reutilização de código, facilitando a manutenção e reduzindo a repetição."
+},
+"servers": [
+{
+"url": "http://localhost:3000",
+"description": "Servidor local"
+}
+],
+"tags": [
+{
+"name": "Usuários",
+"description": "Operações relacionadas aos usuários"
+},
+{
+"name": "Livros",
+"description": "Operações relacionadas aos livros"
+},
+{
+"name": "Empréstimos",
+"description": "Operações relacionadas aos empréstimos"
+}
+],
+"paths": {
+"/usuarios": {
+"get": {
+"tags": [
+"Usuários"
+],
+"summary": "Lista usuários",
+"description": "Lista os usuários com possibilidade de filtragem e paginação.",
+"parameters": [
+{
+"$ref": "#/components/parameters/Page"
+},
+{
+"$ref": "#/components/parameters/Limit"
+},
+{
+"name": "nome",
+"in": "query",
+"description": "Filtra usuários pelo nome.",
+"required": false,
+"schema": {
+"type": "string",
+"example": "Jo"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Lista de usuários",
+"content": {
+"application/json": {
+"example": {
+"dados": [
+{
+"id": 1,
+"nome": "José Almeida",
+"idade": 28,
+"sexo": "masculino"
+},
+{
+"id": 2,
+"nome": "Mariana Santos",
+"idade": 24
+}
+],
+"paginacao": {
+"total": 2,
+"paginaAtual": 1,
+"totalPaginas": 1
+}
+}
+}
+}
+}
+}
+},
+"post": {
+"tags": [
+"Usuários"
+],
+"summary": "Cria um usuário",
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"example": {
+"nome": "Ana Beatriz Costa",
+"idade": "22"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Usuário criado com sucesso",
+"content": {
+"application/json": {
+"example": {
+"id": 5,
+"nome": "Ana Beatriz Costa",
+"idade": "22"
+}
+}
+}
+}
+}
+}
+},
+
+
+"/usuarios/{id}": {
+  "get": {
+    "tags": [
+      "Usuários"
+    ],
+    "summary": "Busca usuário por ID",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Usuário encontrado",
+        "content": {
+          "application/json": {
+            "example": {
+              "id": 1,
+              "nome": "José Almeida",
+              "idade": 28,
+              "sexo": "masculino"
+            }
+          }
+        }
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundUsuario"
+      }
+    }
+  },
+
+  "put": {
+    "tags": [
+      "Usuários"
+    ],
+    "summary": "Atualiza completamente um usuário",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "nome": "daginho",
+            "idade": "22"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Usuário atualizado com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundUsuario"
+      }
+    }
+  },
+
+  "patch": {
+    "tags": [
+      "Usuários"
+    ],
+    "summary": "Atualiza parcialmente um usuário",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "nome": "dagi",
+            "idade": "15",
+            "sexo": "marcelinho"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Usuário atualizado parcialmente com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundUsuario"
+      }
+    }
+  },
+
+  "delete": {
+    "tags": [
+      "Usuários"
+    ],
+    "summary": "Remove um usuário",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "204": {
+        "description": "Usuário removido com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundUsuario"
+      }
+    }
+  }
+},
+
+"/usuarios/{id}/emprestimos": {
+  "get": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Lista empréstimos de um usuário",
+    "description": "Retorna todos os empréstimos associados ao usuário informado.",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Empréstimos encontrados",
+        "content": {
+          "application/json": {
+            "example": [
+              {
+                "id": 3,
+                "usuarioId": 2,
+                "livroId": 1,
+                "dataEmprestimo": "2026-09-03"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+},
+
+"/livros": {
+  "get": {
+    "tags": [
+      "Livros"
+    ],
+    "summary": "Lista livros",
+    "description": "Lista os livros com possibilidade de filtragem e paginação.",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Page"
+      },
+      {
+        "$ref": "#/components/parameters/Limit"
+      },
+      {
+        "name": "genero",
+        "in": "query",
+        "description": "Filtra livros pelo gênero.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "ficcao"
+        }
+      },
+      {
+        "name": "titulo",
+        "in": "query",
+        "description": "Filtra livros pelo título.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "dom"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Lista de livros",
+        "content": {
+          "application/json": {
+            "example": {
+              "dados": [
+                {
+                  "id": 1,
+                  "titulo": "Vidas Desgraçadas",
+                  "autor": "Graciliano Ramon",
+                  "ano": 1938
+                }
+              ],
+              "paginacao": {
+                "total": 1,
+                "paginaAtual": 1,
+                "totalPaginas": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "post": {
+    "tags": [
+      "Livros"
+    ],
+    "summary": "Cria um livro",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "id": 1,
+            "titulo": "Vidas desgraças",
+            "autor": "Graciliano Ramon",
+            "ano": 1938
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": {
+        "description": "Livro criado com sucesso"
+      }
+    }
+  }
+},
+
+"/livros/{id}": {
+  "get": {
+    "tags": [
+      "Livros"
+    ],
+    "summary": "Busca livro por ID",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Livro encontrado",
+        "content": {
+          "application/json": {
+            "example": {
+              "id": 1,
+              "titulo": "Vidas Desgraçadas",
+              "autor": "Graciliano Ramon",
+              "ano": 1938
+            }
+          }
+        }
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundLivro"
+      }
+    }
+  },
+
+  "put": {
+    "tags": [
+      "Livros"
+    ],
+    "summary": "Atualiza completamente um livro",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "id": 1,
+            "titulo": "Vidas satanas",
+            "autor": "Graciliano Ramon",
+            "ano": 1938
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Livro atualizado com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundLivro"
+      }
+    }
+  },
+
+  "patch": {
+    "tags": [
+      "Livros"
+    ],
+    "summary": "Atualiza parcialmente um livro",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "titulo": "Dom Casmurro - Nova Edição"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Livro atualizado parcialmente com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundLivro"
+      }
+    }
+  },
+
+  "delete": {
+    "tags": [
+      "Livros"
+    ],
+    "summary": "Remove um livro",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "204": {
+        "description": "Livro removido com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundLivro"
+      }
+    }
+  }
+},
+
+"/emprestimos": {
+  "get": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Lista empréstimos",
+    "description": "Lista os empréstimos com possibilidade de filtragem e paginação.",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Page"
+      },
+      {
+        "$ref": "#/components/parameters/Limit"
+      },
+      {
+        "name": "livroId",
+        "in": "query",
+        "description": "Filtra empréstimos pelo ID do livro.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Lista de empréstimos",
+        "content": {
+          "application/json": {
+            "example": {
+              "dados": [
+                {
+                  "id": 1,
+                  "usuarioId": 1,
+                  "livroId": 2,
+                  "dataEmprestimo": "2026-09-01"
+                }
+              ],
+              "paginacao": {
+                "total": 1,
+                "paginaAtual": 1,
+                "totalPaginas": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "post": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Cria um empréstimo",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "usuarioId": 2,
+            "livroId": 1,
+            "dataEmprestimo": "2026-09-03"
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": {
+        "description": "Empréstimo criado com sucesso"
+      }
+    }
+  }
+},
+
+"/emprestimos/{id}": {
+  "get": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Busca empréstimo por ID",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Empréstimo encontrado",
+        "content": {
+          "application/json": {
+            "example": {
+              "id": 1,
+              "usuarioId": 1,
+              "livroId": 2,
+              "dataEmprestimo": "2026-09-01"
+            }
+          }
+        }
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundEmprestimo"
+      }
+    }
+  },
+
+  "put": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Atualiza completamente um empréstimo",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "id": 1,
+            "usuarioId": 1,
+            "livroId": 2,
+            "dataEmprestimo": "2026-09-01"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Empréstimo atualizado com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundEmprestimo"
+      }
+    }
+  },
+
+  "patch": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Atualiza parcialmente um empréstimo",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "example": {
+            "dataEmprestimo": "2026-11-09"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Empréstimo atualizado parcialmente com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundEmprestimo"
+      }
+    }
+  },
+
+  "delete": {
+    "tags": [
+      "Empréstimos"
+    ],
+    "summary": "Remove um empréstimo",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/Id"
+      }
+    ],
+    "responses": {
+      "204": {
+        "description": "Empréstimo removido com sucesso"
+      },
+      "404": {
+        "$ref": "#/components/responses/NotFoundEmprestimo"
+      }
+    }
+  }
+}
+
+},
+
+"components": {
+"parameters": {
+"Id": {
+"name": "id",
+"in": "path",
+"description": "ID do recurso",
+"required": true,
+"schema": {
+"type": "integer",
+"example": 1
+}
+},
+
+
+  "Page": {
+    "name": "page",
+    "in": "query",
+    "description": "Número da página.",
+    "required": false,
+    "schema": {
+      "type": "integer",
+      "default": 1,
+      "minimum": 1,
+      "example": 1
+    }
+  },
+
+  "Limit": {
+    "name": "limit",
+    "in": "query",
+    "description": "Quantidade de registros por página.",
+    "required": false,
+    "schema": {
+      "type": "integer",
+      "default": 10,
+      "minimum": 1,
+      "example": 20
+    }
+  }
+},
+
+"responses": {
+  "NotFoundUsuario": {
+    "description": "Usuário não encontrado",
+    "content": {
+      "application/json": {
+        "example": {
+          "message": "Usuário não encontrado"
+        }
+      }
+    }
+  },
+
+  "NotFoundLivro": {
+    "description": "Livro não encontrado",
+    "content": {
+      "application/json": {
+        "example": {
+          "message": "Livro não encontrado"
+        }
+      }
+    }
+  },
+
+  "NotFoundEmprestimo": {
+    "description": "Empréstimo não encontrado",
+    "content": {
+      "application/json": {
+        "example": {
+          "message": "Empréstimo não encontrado"
+        }
+      }
+    }
+  }
+},
+
+"schemas": {
+  "Usuario": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "example": 1
+      },
+      "nome": {
+        "type": "string",
+        "example": "José Almeida"
+      },
+      "idade": {
+        "type": "string",
+        "example": "22"
+      },
+      "sexo": {
+        "type": "string",
+        "example": "masculino"
+      }
+    }
+  },
+
+  "Livro": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "example": 1
+      },
+      "titulo": {
+        "type": "string",
+        "example": "Dom Casmurro"
+      },
+      "autor": {
+        "type": "string",
+        "example": "Machado de Assis"
+      },
+      "ano": {
+        "type": "integer",
+        "example": 1899
+      },
+      "genero": {
+        "type": "string",
+        "example": "ficcao"
+      }
+    }
+  },
+
+  "Emprestimo": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "example": 1
+      },
+      "usuarioId": {
+        "type": "integer",
+        "example": 1
+      },
+      "livroId": {
+        "type": "integer",
+        "example": 2
+      },
+      "dataEmprestimo": {
+        "type": "string",
+        "format": "date",
+        "example": "2026-09-01"
+      }
+    }
+  }
+}
+
+
+}
+}

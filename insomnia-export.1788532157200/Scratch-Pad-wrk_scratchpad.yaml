@@ -1,0 +1,788 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Scratch Pad
+meta:
+  id: wrk_scratchpad
+  created: 1763919853874
+  modified: 1763919853874
+  description: ""
+collection:
+  - url: http://localhost:3000/usuarios/2/emprestimos
+    name: RELACÃO EMPRESTIMO USUARIO-EMPRESTIMO
+    meta:
+      id: req_b25cfcb110ea4014a03a76b96af0e604
+      created: 1788527614514
+      modified: 1788529693368
+      isPrivate: false
+      description: ""
+      sortKey: -1788527614514
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.6.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - name: TABALHO 1
+    meta:
+      id: fld_dd128282cb774da4bfee3d65a2788519
+      created: 1788399221991
+      modified: 1788522693617
+      sortKey: -1788399221991
+      description: ""
+    children:
+      - name: requisições livros
+        meta:
+          id: fld_fbc373a6e7d845efb46bfde6b3f4d810
+          created: 1788522701846
+          modified: 1788529732643
+          sortKey: -1788399317169
+          description: ""
+        children:
+          - url: http://localhost:3000/livros
+            name: Listar todos os itens
+            meta:
+              id: req_ed57ed3e61f44cfe93aea96208281444
+              created: 1788399226747
+              modified: 1788522743324
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718361.5
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros/1
+            name: Retorna um item específico
+            meta:
+              id: req_86657a23ecf04a8bbfaff941c22d0df2
+              created: 1788399329722
+              modified: 1788522741754
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718374
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros
+            name: Cria um novo item
+            meta:
+              id: req_70fe85a338174831ba47e005ef2a69fc
+              created: 1788399352091
+              modified: 1788522746061
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718599
+            method: POST
+            body:
+              mimeType: application/json
+              text: |2-
+                  { 
+                    "id": 1, 
+                    "titulo": "Vidas desgraças", 
+                    "autor": "Graciliano Ramon", 
+                    "ano": 1938 
+                  }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros/1
+            name: Substitui um item existente
+            meta:
+              id: req_3fd8ea46fc654194b3bc9244c33262cc
+              created: 1788399385204
+              modified: 1788522754339
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718624
+            method: PUT
+            body:
+              mimeType: application/json
+              text: |2-
+                  { 
+                    "id": 1, 
+                    "titulo": "Vidas satanas", 
+                    "autor": "Graciliano Ramon", 
+                    "ano": 1938 
+                  }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros/1
+            name: Atualiza parcialmente um item
+            meta:
+              id: req_d48cd32bd24f430b85fd7872165010d1
+              created: 1788399409803
+              modified: 1788522727216
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718649
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: "\ 
+
+                {
+
+                \  \"titulo\": \"Dom Casmurro - Nova Edição\"
+
+                }
+
+                \  "
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros/3
+            name: Remove um item
+            meta:
+              id: req_41761e2b4b01459f88302aba6b3daf3a
+              created: 1788399441312
+              modified: 1788522728588
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718749
+            method: DELETE
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros?genero=ficcao
+            name: retorna genero
+            meta:
+              id: req_62783098945a4814807ed04b7727ffb5
+              created: 1788521260049
+              modified: 1788525016745
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718449
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros?titulo=dom
+            name: retorna titulo
+            meta:
+              id: req_10f2d8b1b8a749d5a708180aaa28fafd
+              created: 1788521649110
+              modified: 1788522723300
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718549
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/livros?page=1&limit=1
+            name: paginação e limite
+            meta:
+              id: req_c00b611c5afa4d5a9af6437848425dca
+              created: 1788522258326
+              modified: 1788527629876
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718574
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: requisições usuarios
+        meta:
+          id: fld_2b6e06b790274994a9bd4e9d4e959b1d
+          created: 1788529759993
+          modified: 1788529759993
+          sortKey: -1788399269580
+          description: ""
+        children:
+          - url: http://localhost:3000/usuarios/18
+            name: Substitui um item existente
+            meta:
+              id: req_0fc15f85bff74dcdbf4398175410fc13
+              created: 1788529759993
+              modified: 1788530178314
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718624
+            method: PUT
+            body:
+              mimeType: application/json
+              text: |-
+                {			"nome": "daginho",
+                			"idade": "22"
+
+
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios?page=1&limit=20
+            name: paginação e limite
+            meta:
+              id: req_2a3dfb67b0494346940efe2f7c404ad7
+              created: 1788529759993
+              modified: 1788530115831
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718574
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios
+            name: Listar todos os itens
+            meta:
+              id: req_42efcb9328124d338dccfb7bfa8a5d4b
+              created: 1788529759993
+              modified: 1788529924039
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718361.5
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios?nome=Jo
+            name: retorna por uma chave
+            meta:
+              id: req_5ec99f477b0445759afcacba8dff6f28
+              created: 1788529759993
+              modified: 1788529972450
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718549
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios/1
+            name: Retorna um item específico
+            meta:
+              id: req_636595d549d94780bdf20b129a57d23f
+              created: 1788529759993
+              modified: 1788529915458
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718374
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios/4
+            name: Atualiza parcialmente um item
+            meta:
+              id: req_8afa203c6c6947868d22011ab43c24d2
+              created: 1788529759993
+              modified: 1788531109860
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718649
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: "\ 
+
+                {
+
+                \t\"nome\":\"dagi\",
+
+                \t\"idade\":\"15\",
+
+                \  \"sexo\":\"marcelinho\"
+
+
+                }
+
+                \  "
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios/3
+            name: Remove um item
+            meta:
+              id: req_d6f29e0d66fd46b9b6a8160f9d90485f
+              created: 1788529759993
+              modified: 1788529782850
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718749
+            method: DELETE
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/usuarios
+            name: Cria um novo item
+            meta:
+              id: req_f4797181fff3470a87537662d87986bd
+              created: 1788529759993
+              modified: 1788530038954
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718599
+            method: POST
+            body:
+              mimeType: application/json
+              text: |2-
+                  { 
+                    
+                    "nome": "Ana Beatriz Costa",
+                    "idade": "22"
+                  }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: requisições emprestimos
+        meta:
+          id: fld_0fdbc89140e84feb9ab39e70db7ad8d7
+          created: 1788531172611
+          modified: 1788531219094
+          sortKey: -1788399245785.5
+          description: ""
+        children:
+          - url: http://localhost:3000/emprestimos/1
+            name: Retorna um item específico
+            meta:
+              id: req_1aab0f9d003c4efea0ddd05bd8dd6c0b
+              created: 1788531172611
+              modified: 1788531872376
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718374
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos/1
+            name: Atualiza parcialmente um item
+            meta:
+              id: req_1bb7c65f5ace46b991f8eea05af09830
+              created: 1788531172611
+              modified: 1788532078729
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718649
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: "\ 
+
+                {
+
+                \t\t\t\"dataEmprestimo\": \"2026-11-09\"
+
+
+                }
+
+                \  "
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos?page=1&limit=20
+            name: paginação e limite
+            meta:
+              id: req_36340a7407a14658acda79c63cbdb8b2
+              created: 1788531172611
+              modified: 1788531953662
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718574
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos?livroId=1
+            name: retorna por uma chave
+            meta:
+              id: req_61c8972b1881405088875454fe9eb777
+              created: 1788531172611
+              modified: 1788531910181
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718549
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos/1
+            name: Substitui um item existente
+            meta:
+              id: req_8b66a1c7657f4c8692525ee19844506d
+              created: 1788531172611
+              modified: 1788532030159
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718624
+            method: PUT
+            body:
+              mimeType: application/json
+              text: |-
+                {			
+                			"id": 1,
+                			"usuarioId": 1,
+                			"livroId": 2,
+                			"dataEmprestimo": "2026-09-01"
+
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos
+            name: Cria um novo item
+            meta:
+              id: req_aad4574876ff48958797a2e9d98f9656
+              created: 1788531172611
+              modified: 1788531986083
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718599
+            method: POST
+            body:
+              mimeType: application/json
+              text: "
+
+                \   \ 
+
+                \t\t{
+
+
+                \t\t\t\"usuarioId\": 2,
+
+                \t\t\t\"livroId\": 1,
+
+                \t\t\t\"dataEmprestimo\": \"2026-09-03\"
+
+                \t\t}
+
+                \  "
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos
+            name: Listar todos os itens
+            meta:
+              id: req_b6890142cd504efd8adc31c4e95c89c4
+              created: 1788531172611
+              modified: 1788531206078
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718361.5
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/emprestimos/1
+            name: Remove um item
+            meta:
+              id: req_fe92b7028dca413fb4098446fe540546
+              created: 1788531172611
+              modified: 1788532086333
+              isPrivate: false
+              description: ""
+              sortKey: -1788522718749
+            method: DELETE
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_99d30891da4bdcebc63947a8fc17f076de878684
+    created: 1763919884100
+    modified: 1764015632651
+  cookies:
+    - id: 6c9f0001-7d2c-4d48-9a43-0339355e2d4f
+      key: ads_id
+      value: TESTE
+      domain: 127.0.0.1
+      path: /
+      secure: false
+      httpOnly: false
+      hostOnly: true
+    - id: b62a73aa-a6df-42f8-b944-1546539f061e
+      key: user
+      value: '"Daginho.m.s@gmail.com"'
+      domain: 127.0.0.1
+      path: /
+      secure: false
+      httpOnly: false
+      hostOnly: true
+environments:
+  name: Base Environment
+  meta:
+    id: env_99d30891da4bdcebc63947a8fc17f076de878684
+    created: 1763919884097
+    modified: 1763919884097
+    isPrivate: false
