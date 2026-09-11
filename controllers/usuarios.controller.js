@@ -13,17 +13,16 @@ const controllerBase = criarController(
     "Usuário"
 )
 
-
 export const usuariosController = {
 
     ...controllerBase,
 
-    buscarEmprestimosPorUsuario: (req, res) => {
+    buscarEmprestimosPorUsuario: async (req, res) => {
 
         const id = parseInt(req.params.id)
 
         const usuario =
-            usuariosRepository.buscarPorId(id)
+            await usuariosRepository.buscarPorId(id)
 
         if (!usuario) {
 
@@ -34,7 +33,7 @@ export const usuariosController = {
         }
 
         const emprestimos =
-            emprestimosRepository.buscarPorUsuario(id)
+            await emprestimosRepository.buscarPorUsuario(id)
 
         res.status(200).json(emprestimos)
     }

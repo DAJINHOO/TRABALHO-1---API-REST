@@ -1,102 +1,130 @@
-export const criarRepository = (dados) => {
+import { pool } from '../config/database.js'
 
-    let proximoId =
-        dados.length > 0
-            ? Math.max(...dados.map(recurso => recurso.id)) + 1
-            : 1
+export const criarRepository = (tabela) => {
 
     return {
 
-        listar: () => dados,
+        listar: async () => {
 
-        buscarPorId: (id) => {
-            return dados.find(recurso => recurso.id === id)
+            const resultado = await pool.query(
+                `SELECT * FROM ${tabela}`
+            )
+
+            return resultado.rows
         },
 
-        criar: (recurso) => {
 
-            recurso.id = proximoId++
+        buscarPorId: async (id) => {
 
-            dados.push(recurso)
+            const resultado = await pool.query(
+                `SELECT * FROM ${tabela} WHERE id = $1`,
+                [id]
+            )
 
-            return recurso
+            return resultado.rows[0]
         },
 
-       atualizar: (id, dadosAtualizados) => {
 
-            const index =
-                dados.findIndex(recurso => recurso.id === id)
+        criar: async (recurso) => {
 
-            if (index !== -1) {
+            const campos = Object.keys(recurso)
 
-                dados[index] = {
-                    ...dados[index],
-                    ...dadosAtualizados
-                }
+            const valores = Object.values(recurso)
 
-                return dados[index]
-            }
+            const placeholders = valores
+                .map((_, index) => `$${index + 1}`)
+                .join(', ')
 
-            return null
+            const resultado = await pool.query(
+                `
+                INSERT INTO ${tabela}
+                (${campos.join(', ')})
+                VALUES (${placeholders})
+                RETURNING *
+                `,
+                valores
+            )
+
+            return resultado.rows[0]
         },
 
-        remover: (id) => {
 
-            const index =
-                dados.findIndex(recurso => recurso.id === id)
+        atualizar: async (id, dadosAtualizados) => {
 
-            if (index !== -1) {
+            const campos = Object.keys(dadosAtualizados)
 
-                dados.splice(index, 1)
+            const valores = Object.values(dadosAtualizados)
 
-                return true
-            }
+            const camposAtualizacao = campos
+                .map((campo, index) => `${campo} = $${index + 1}`)
+                .join(', ')
 
-            return false
+            const resultado = await pool.query(
+                `
+                UPDATE ${tabela}
+                SET ${camposAtualizacao}
+                WHERE id = $${valores.length + 1}
+                RETURNING *
+                `,
+                [...valores, id]
+            )
+
+            return resultado.rows[0] || null
         },
 
-        buscar: (filtros) => {
 
-            let resultado = [...dados]
+        remover: async (id) => {
 
-            for (const campo in filtros) {
+            const resultado = await pool.query(
+                `
+                DELETE FROM ${tabela}
+                WHERE id = $1
+                RETURNING *
+                `,
+                [id]
+            )
 
-                const valor = filtros[campo]
+            return resultado.rowCount > 0
+        },
 
-                // Ignora paginação
-                if (
-                    campo === 'page' ||
-                    campo === 'limit'
-                ) {
-                    continue
-                }
 
-                if (valor) {
+        buscar: async (filtros) => {
 
-                    resultado = resultado.filter(recurso => {
+            const filtrosValidos = Object.entries(filtros)
+                .filter(([campo, valor]) =>
+                    campo !== 'page' &&
+                    campo !== 'limit' &&
+                    valor
+                )
 
-                        const valorRecurso =
-                            recurso[campo]
+            let sql = `SELECT * FROM ${tabela}`
 
-                        if (valorRecurso === undefined) {
-                            return false
-                        }
+            const valores = []
 
-                        return String(valorRecurso)
-                            .toLowerCase()
-                            .includes(
-                                String(valor).toLowerCase()
-                            )
+            if (filtrosValidos.length > 0) {
 
+                const where = filtrosValidos
+                    .map(([campo, valor], index) => {
+
+                        valores.push(valor)
+
+                        return `
+                            CAST(${campo} AS TEXT)
+                            ILIKE '%' || $${index + 1} || '%'
+                        `
                     })
+                    .join(' AND ')
 
-                }
-
+                sql += ` WHERE ${where}`
             }
 
-            return resultado
+            const resultado = await pool.query(
+                sql,
+                valores
+            )
+
+            return resultado.rows
         }
 
     }
-
 }

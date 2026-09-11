@@ -1,8 +1,10 @@
+
+
 export const criarController = (repository, nomeRecurso) => {
 
     return {
 
-        listar: (req, res) => {
+        listar: async(req, res) => {
 
             let page = parseInt(req.query.page) || 1
             let limit = parseInt(req.query.limit) || 10
@@ -18,7 +20,7 @@ export const criarController = (repository, nomeRecurso) => {
             const filtros = req.query
 
             const recursosFiltrados =
-                repository.buscar(filtros)
+                await repository.buscar(filtros)
 
             const total = recursosFiltrados.length
 
@@ -47,12 +49,12 @@ export const criarController = (repository, nomeRecurso) => {
 
         },
 
-        buscarPorId: (req, res) => {
+        buscarPorId: async(req, res) => {
 
             const id = parseInt(req.params.id)
 
             const recurso =
-                repository.buscarPorId(id)
+                await repository.buscarPorId(id)
 
             if (!recurso) {
 
@@ -66,22 +68,22 @@ export const criarController = (repository, nomeRecurso) => {
 
         },
 
-        criar: (req, res) => {
+        criar: async(req, res) => {
 
             const recurso =
-                repository.criar(req.body)
+                await repository.criar(req.body)
 
             res.status(201).json(recurso)
 
         },
 
-        atualizar: (req, res) => {
+        atualizar: async (req, res) => {
 
             const id =
                 parseInt(req.params.id)
 
             const recurso =
-                repository.atualizar(
+                await repository.atualizar(
                     id,
                     req.body
                 )
@@ -98,13 +100,13 @@ export const criarController = (repository, nomeRecurso) => {
 
         },
 
-        remover: (req, res) => {
+        remover: async(req, res) => {
 
             const id =
                 parseInt(req.params.id)
 
             const sucesso =
-                repository.remover(id)
+                await repository.remover(id)
 
             if (!sucesso) {
 
