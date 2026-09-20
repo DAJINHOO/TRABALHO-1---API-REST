@@ -1,13 +1,7 @@
-import pg from 'pg'
+import 'dotenv/config'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '@prisma/client'
 
-const { Pool } = pg
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 
-export const pool = new Pool({
-    host: 'localhost',
-    port: 5432,
-    user: 'postgres',
-    password: 'postgres',
-    database: 'biblioteca',
-    max: 10, // número máximo de conexões simultâneas
-    idle_in_transaction_session_timeout: 30000
-})
+export const prisma = new PrismaClient({ adapter })

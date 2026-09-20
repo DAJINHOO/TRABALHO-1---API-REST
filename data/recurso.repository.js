@@ -1,130 +1,72 @@
-import { pool } from '../config/database.js'
+import { prisma } from '../config/database.js'
 
-export const criarRepository = (tabela) => {
+export const criarRepository = (tabela, opcoes = {}) => {
+  const {
+    pk = 'id',                  // aceita string ou array (PK composta)
+    camposImutaveis = ['id', 'criado_em', 'atualizado_em'],
+    camposBusca = [],           // whitelist p/ busca por trecho
+  } = opcoes
 
-    return {
+  const chavesPk = Array.isArray(pk) ? pk : [pk]
+  const model = prisma[tabela]
 
-        listar: async () => {
+  if (!model) {
+    throw new Error(`Model Prisma "${tabela}" não existe`)
+  }
 
-            const resultado = await pool.query(
-                `SELECT * FROM ${tabela}`
-            )
+  // monta o filtro da PK (suporta composta)
+  const filtroPk = (valor) => {
+    if (chavesPk.length === 1) return { [chavesPk[0]]: valor }
+    return Object.fromEntries(chavesPk.map((c, i) => [c, valor[i]]))
+  }
 
-            return resultado.rows
-        },
+  return {
+    listar: () => model.findMany(),
 
+    buscarPorId: (id) => model.findUnique({ where: filtroPk(id) }),
 
-        buscarPorId: async (id) => {
+    criar: (dados) => model.create({ data: dados }),
 
-            const resultado = await pool.query(
-                `SELECT * FROM ${tabela} WHERE id = $1`,
-                [id]
-            )
+    atualizar: async (id, dados) => {
+      const campos = Object.keys(dados).filter(
+        (c) => !camposImutaveis.includes(c)
+      )
+      if (campos.length === 0) return null
 
-            return resultado.rows[0]
-        },
+      try {
+        return await model.update({
+          where: filtroPk(id),
+          data: Object.fromEntries(campos.map((c) => [c, dados[c]])),
+        })
+      } catch {
+        return null
+      }
+    },
 
+    remover: async (id) => {
+      try {
+        await model.delete({ where: filtroPk(id) })
+        return true
+      } catch {
+        return false
+      }
+    },
 
-        criar: async (recurso) => {
+    buscar: async (filtros, { page = 1, limit = 20 } = {}) => {
+      const where = {}
 
-            const campos = Object.keys(recurso)
+      for (const [campo, valor] of Object.entries(filtros)) {
+        if (valor === undefined || valor === null || valor === '') continue
+        if (!camposBusca.includes(campo)) continue
 
-            const valores = Object.values(recurso)
+        where[campo] = { contains: valor, mode: 'insensitive' }
+      }
 
-            const placeholders = valores
-                .map((_, index) => `$${index + 1}`)
-                .join(', ')
-
-            const resultado = await pool.query(
-                `
-                INSERT INTO ${tabela}
-                (${campos.join(', ')})
-                VALUES (${placeholders})
-                RETURNING *
-                `,
-                valores
-            )
-
-            return resultado.rows[0]
-        },
-
-
-        atualizar: async (id, dadosAtualizados) => {
-
-            const campos = Object.keys(dadosAtualizados)
-
-            const valores = Object.values(dadosAtualizados)
-
-            const camposAtualizacao = campos
-                .map((campo, index) => `${campo} = $${index + 1}`)
-                .join(', ')
-
-            const resultado = await pool.query(
-                `
-                UPDATE ${tabela}
-                SET ${camposAtualizacao}
-                WHERE id = $${valores.length + 1}
-                RETURNING *
-                `,
-                [...valores, id]
-            )
-
-            return resultado.rows[0] || null
-        },
-
-
-        remover: async (id) => {
-
-            const resultado = await pool.query(
-                `
-                DELETE FROM ${tabela}
-                WHERE id = $1
-                RETURNING *
-                `,
-                [id]
-            )
-
-            return resultado.rowCount > 0
-        },
-
-
-        buscar: async (filtros) => {
-
-            const filtrosValidos = Object.entries(filtros)
-                .filter(([campo, valor]) =>
-                    campo !== 'page' &&
-                    campo !== 'limit' &&
-                    valor
-                )
-
-            let sql = `SELECT * FROM ${tabela}`
-
-            const valores = []
-
-            if (filtrosValidos.length > 0) {
-
-                const where = filtrosValidos
-                    .map(([campo, valor], index) => {
-
-                        valores.push(valor)
-
-                        return `
-                            CAST(${campo} AS TEXT)
-                            ILIKE '%' || $${index + 1} || '%'
-                        `
-                    })
-                    .join(' AND ')
-
-                sql += ` WHERE ${where}`
-            }
-
-            const resultado = await pool.query(
-                sql,
-                valores
-            )
-
-            return resultado.rows
-        }
-
-    }
+      return model.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+      })
+    },
+  }
 }

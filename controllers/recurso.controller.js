@@ -53,6 +53,12 @@ export const criarController = (repository, nomeRecurso) => {
 
             const id = parseInt(req.params.id)
 
+              if (Number.isNaN(id)) {
+                  return res.status(400).json({ message: 'ID inválido' })
+              }
+
+
+
             const recurso =
                 await repository.buscarPorId(id)
 

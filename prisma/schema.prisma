@@ -1,0 +1,95 @@
+generator client {
+  provider        = "prisma-client-js"
+
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Genero {
+  id        Int     @id @default(autoincrement())
+  nome      String  @unique @db.VarChar(60)
+  descricao String?
+  livros    Livro[]
+
+  @@map("generos")
+}
+
+model Autor {
+  id              Int          @id @default(autoincrement())
+  nome            String       @db.VarChar(120)
+  ano_nascimento  Int?
+  ano_falecimento Int?
+  nacionalidade   String?      @db.VarChar(60)
+  livros_autores  LivroAutor[]
+
+  @@unique([nome, ano_nascimento])
+  @@index([nome(ops: raw("gin_trgm_ops"))], map: "idx_autores_nome_trgm", type: Gin)
+  @@map("autores")
+}
+
+model Livro {
+  id             Int          @id @default(autoincrement())
+  titulo         String       @db.VarChar(200)
+  isbn           String?      @unique @db.VarChar(20)
+  ano            Int?
+  editora        String?      @db.VarChar(120)
+  idioma         String       @default("Português") @db.VarChar(40)
+  num_paginas    Int?
+  exemplares     Int          @default(1)
+  genero_id      Int?
+  criado_em      DateTime     @default(now()) @db.Timestamp(6)
+  atualizado_em  DateTime     @default(now()) @db.Timestamp(6)
+  genero         Genero?      @relation(fields: [genero_id], references: [id], onUpdate: NoAction)
+  emprestimos    Emprestimo[]
+  livros_autores LivroAutor[]
+
+  @@index([genero_id], map: "idx_livros_genero_id")
+  @@index([titulo(ops: raw("gin_trgm_ops"))], map: "idx_livros_titulo_trgm", type: Gin)
+  @@map("livros")
+}
+
+model LivroAutor {
+  livro_id Int
+  autor_id Int
+  livro    Livro @relation(fields: [livro_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  autor    Autor @relation(fields: [autor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([livro_id, autor_id])
+  @@index([autor_id], map: "idx_livros_autores_autor_id")
+  @@map("livros_autores")
+}
+
+model Usuario {
+  id             Int          @id @default(autoincrement())
+  nome           String       @db.VarChar(120)
+  matricula      String       @unique @db.VarChar(20)
+  email          String?      @unique @db.VarChar(160)
+  curso          String?      @db.VarChar(120)
+  data_matricula DateTime     @default(dbgenerated("CURRENT_DATE")) @db.Date
+  ativo          Boolean      @default(true)
+  emprestimos    Emprestimo[]
+
+  @@map("usuarios")
+}
+
+model Emprestimo {
+  id             Int       @id @default(autoincrement())
+  livro_id       Int
+  usuario_id     Int       @map("estudante_id")
+  data_retirada  DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  data_prevista  DateTime  @db.Date
+  data_devolucao DateTime? @db.Date
+  renovacoes     Int       @default(0)
+  status         String    @default("ativo") @db.VarChar(15)
+  usuario        Usuario   @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  livro          Livro     @relation(fields: [livro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([usuario_id], map: "idx_emprestimos_estudante_id")
+  @@index([livro_id], map: "idx_emprestimos_livro_id")
+  @@index([status], map: "idx_emprestimos_status")
+  @@index([data_prevista], map: "idx_emprestimos_pendentes", where: raw("(data_devolucao IS NULL)"))
+  @@map("emprestimos")
+}

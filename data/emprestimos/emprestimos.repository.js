@@ -1,30 +1,15 @@
-import { pool }
-    from '../../config/database.js'
+import { prisma } from '../../config/database.js'
+import { criarRepository } from '../recurso.repository.js'
 
-import { criarRepository }
-    from '../recurso.repository.js'
-
-
-const repositoryBase =
-    criarRepository('emprestimos')
-
+const repositoryBase = criarRepository('emprestimo', {
+  camposBusca: ['status'],
+})
 
 export const emprestimosRepository = {
+  ...repositoryBase,
 
-    ...repositoryBase,
-
-    buscarPorUsuario: async (usuarioId) => {
-
-        const resultado = await pool.query(
-            `
-            SELECT *
-            FROM emprestimos
-            WHERE usuario_id = $1
-            `,
-            [usuarioId]
-        )
-
-        return resultado.rows
-    }
-
+  buscarPorUsuario: (usuarioId) =>
+    prisma.emprestimo.findMany({
+      where: { usuario_id: usuarioId },
+    }),
 }
