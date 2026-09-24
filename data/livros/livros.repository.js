@@ -10,6 +10,7 @@ const includeCompleto = {
   livros_autores: { include: { autor: true } },
 }
 
+// Formata a resposta: substitui livros_autores por autores direto
 const formatar = (livro) =>
   livro && {
     ...livro,
@@ -36,30 +37,33 @@ export const livrosRepository = {
     return formatar(livro)
   },
 
-  criar: async (dados) => {
-    const livro = await prisma.livro.create({
-      data: dados,
-      include: includeCompleto,
-    })
-    return formatar(livro)
-  },
+  buscar: async (filtros, { page = 1, limit = 20 } = {}) => {
+    const { genero, ...resto } = filtros
+    const where = {}
 
-  atualizar: async (id, dados) => {
-    const camposImutaveis = ['id', 'criado_em', 'atualizado_em']
-    const campos = Object.keys(dados).filter(
-      (c) => !camposImutaveis.includes(c)
-    )
-    if (campos.length === 0) return null
+    // Filtros de texto (mesma lógica do genérico)
+    if (resto.titulo)
+      where.titulo = { contains: resto.titulo, mode: 'insensitive' }
+    if (resto.editora)
+      where.editora = { contains: resto.editora, mode: 'insensitive' }
+    if (resto.isbn)
+      where.isbn = { contains: resto.isbn, mode: 'insensitive' }
 
-    try {
-      const livro = await prisma.livro.update({
-        where: { id },
-        data: Object.fromEntries(campos.map((c) => [c, dados[c]])),
-        include: includeCompleto,
-      })
-      return formatar(livro)
-    } catch {
-      return null
+    // Filtro por nome do gênero (via relação)
+    if (genero) {
+      where.genero = {
+        nome: { contains: genero, mode: 'insensitive' },
+      }
     }
+
+    const livros = await prisma.livro.findMany({
+      where,
+      include: includeCompleto,
+      orderBy: { titulo: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    })
+
+    return livros.map(formatar)
   },
 }

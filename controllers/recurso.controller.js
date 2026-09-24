@@ -1,133 +1,89 @@
-
-
 export const criarController = (repository, nomeRecurso) => {
+  return {
+    listar: async (req, res) => {
+      let page = parseInt(req.query.page) || 1
+      let limit = parseInt(req.query.limit) || 10
 
-    return {
+      if (page < 1) page = 1
+      if (limit < 1) limit = 10
 
-        listar: async(req, res) => {
+      // Remove page/limit dos filtros antes de passar pro repository
+      const { page: _p, limit: _l, ...filtros } = req.query
 
-            let page = parseInt(req.query.page) || 1
-            let limit = parseInt(req.query.limit) || 10
+      // Repository pagina no banco (skip/take) e devolve os dados da página
+      const dados = await repository.buscar(filtros, { page, limit })
 
-            if (page < 1) {
-                page = 1
-            }
+      // Se o repository não devolver total, usa o tamanho do array
+      const total = dados.length
+      const totalPaginas = Math.ceil(total / limit)
 
-            if (limit < 1) {
-                limit = 10
-            }
-
-            const filtros = req.query
-
-            const recursosFiltrados =
-                await repository.buscar(filtros)
-
-            const total = recursosFiltrados.length
-
-            const totalPaginas =
-                Math.ceil(total / limit)
-
-            const inicio =
-                (page - 1) * limit
-
-            const fim =
-                inicio + limit
-
-            const recursosPagina =
-                recursosFiltrados.slice(inicio, fim)
-            res.status(200).json({
-
-                dados: recursosPagina,
-
-                paginacao: {
-                    total,
-                    paginaAtual: page,
-                    totalPaginas
-                }
-
-            })
-
+      res.status(200).json({
+        dados,
+        paginacao: {
+          total,
+          paginaAtual: page,
+          totalPaginas,
         },
+      })
+    },
 
-        buscarPorId: async(req, res) => {
+    buscarPorId: async (req, res) => {
+      const id = parseInt(req.params.id)
 
-            const id = parseInt(req.params.id)
+      if (Number.isNaN(id)) {
+        return res.status(400).json({ message: 'ID inválido' })
+      }
 
-              if (Number.isNaN(id)) {
-                  return res.status(400).json({ message: 'ID inválido' })
-              }
+      const recurso = await repository.buscarPorId(id)
 
+      if (!recurso) {
+        return res.status(404).json({
+          message: `${nomeRecurso} não encontrado`,
+        })
+      }
 
+      res.status(200).json(recurso)
+    },
 
-            const recurso =
-                await repository.buscarPorId(id)
+    criar: async (req, res) => {
+      const recurso = await repository.criar(req.body)
+      res.status(201).json(recurso)
+    },
 
-            if (!recurso) {
+    atualizar: async (req, res) => {
+      const id = parseInt(req.params.id)
 
-                return res.status(404).json({
-                    message: `${nomeRecurso} não encontrado`
-                })
+      if (Number.isNaN(id)) {
+        return res.status(400).json({ message: 'ID inválido' })
+      }
 
-            }
+      const recurso = await repository.atualizar(id, req.body)
 
-            res.status(200).json(recurso)
+      if (!recurso) {
+        return res.status(404).json({
+          message: `${nomeRecurso} não encontrado`,
+        })
+      }
 
-        },
+      res.status(200).json(recurso)
+    },
 
-        criar: async(req, res) => {
+    remover: async (req, res) => {
+      const id = parseInt(req.params.id)
 
-            const recurso =
-                await repository.criar(req.body)
+      if (Number.isNaN(id)) {
+        return res.status(400).json({ message: 'ID inválido' })
+      }
 
-            res.status(201).json(recurso)
+      const sucesso = await repository.remover(id)
 
-        },
+      if (!sucesso) {
+        return res.status(404).json({
+          message: `${nomeRecurso} não encontrado`,
+        })
+      }
 
-        atualizar: async (req, res) => {
-
-            const id =
-                parseInt(req.params.id)
-
-            const recurso =
-                await repository.atualizar(
-                    id,
-                    req.body
-                )
-
-            if (!recurso) {
-
-                return res.status(404).json({
-                    message: `${nomeRecurso} não encontrado`
-                })
-
-            }
-
-            res.status(200).json(recurso)
-
-        },
-
-        remover: async(req, res) => {
-
-            const id =
-                parseInt(req.params.id)
-
-            const sucesso =
-                await repository.remover(id)
-
-            if (!sucesso) {
-
-                return res.status(404).json({
-                    message: `${nomeRecurso} não encontrado`
-                })
-
-            }
-
-            res.status(204).json({
-                message: `${nomeRecurso} removido com sucesso`
-            })
-
-        }
-
-    }
-
+      res.status(204).end()
+    },
+  }
 }

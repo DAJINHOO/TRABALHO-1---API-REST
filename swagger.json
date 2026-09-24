@@ -3,22 +3,165 @@
   "info": {
     "title": "API REST - Biblioteca",
     "version": "1.0.0",
-    "description": "API REST para gerenciamento de usuários, livros, autores e empréstimos, construída sobre o schema PostgreSQL disponibilizado pelo professor Tassio.\n\n## Arquitetura\n\nO projeto evoluiu de um padrão genérico de repositório (baseado em SQL cru com `pg`) para uma arquitetura em camadas usando **Prisma ORM (v7 com driver adapter `@prisma/adapter-pg`)**. Cada recurso possui:\n\n- **Repository específico** (`data/<recurso>/<recurso>.repository.js`) que encapsula o acesso ao banco via Prisma Client.\n- **Service** (`services/`) para regras de negócio (ex.: só permite emprestar se houver exemplar disponível, devolução altera status, etc).\n- **Controller** que recebe a requisição HTTP e delega para repository ou service.\n- **Schema Zod** (`schemas/`) para validação de entrada aplicada via middleware.\n\n## Recursos implementados\n\n- CRUD completo de usuários, livros e empréstimos.\n- **N:N de autores** via tabela `livros_autores` (PK composta).\n- **View `vw_disponibilidade_livros`** exposta em `/livros/disponibilidade`, calculando exemplares disponíveis em tempo real.\n- **Regra de negócio de empréstimo**: empréstimo só é criado se houver exemplar disponível; devolução preenche `data_devolucao` e altera `status`.\n- **Marcação em lote** de empréstimos atrasados.\n- Trigger `atualizado_em` no banco mantém timestamp de livros em cada UPDATE."
+    "description": "API REST para gerenciamento de usuários, livros, autores, gêneros e empréstimos, construída sobre o schema PostgreSQL disponibilizado pelo professor Tassio.\n\n## Arquitetura\n\nO projeto evoluiu de um padrão genérico de repositório (baseado em SQL cru com `pg`) para uma arquitetura em camadas usando **Prisma ORM (v7 com driver adapter `@prisma/adapter-pg`)**. Cada recurso possui:\n\n- **Repository específico** (`data/<recurso>/<recurso>.repository.js`) que encapsula o acesso ao banco via Prisma Client.\n- **Service** (`services/`) para regras de negócio (ex.: só permite emprestar se houver exemplar disponível, devolução altera status, etc).\n- **Controller** que recebe a requisição HTTP e delega para repository ou service.\n- **Schema Zod** (`schemas/`) para validação de entrada aplicada via middleware.\n\n## Recursos implementados\n\n- CRUD completo de usuários, livros, gêneros e empréstimos.\n- **Filtro de livros por gênero** via relação N:1 (`livros.genero_id` → `generos.id`), aceitando trecho do nome (case-insensitive).\n- **N:N de autores** via tabela `livros_autores` (PK composta).\n- **View `vw_disponibilidade_livros`** exposta em `/livros/disponibilidade`, calculando exemplares disponíveis em tempo real.\n- **Regra de negócio de empréstimo**: empréstimo só é criado se houver exemplar disponível; devolução preenche `data_devolucao` e altera `status`.\n- **Marcação em lote** de empréstimos atrasados.\n- Trigger `atualizado_em` no banco mantém timestamp de livros em cada UPDATE."
   },
   "servers": [
-    {
-      "url": "http://localhost:3000",
-      "description": "Servidor local"
-    }
+    { "url": "http://localhost:3000", "description": "Servidor local" }
   ],
   "tags": [
     { "name": "Usuários", "description": "Operações relacionadas aos usuários" },
     { "name": "Livros", "description": "Operações relacionadas aos livros" },
+    { "name": "Gêneros", "description": "Operações relacionadas aos gêneros literários" },
     { "name": "Autores", "description": "Associação N:N entre livros e autores" },
     { "name": "Empréstimos", "description": "Operações relacionadas aos empréstimos" },
     { "name": "Disponibilidade", "description": "Consulta em tempo real de exemplares disponíveis (via view)" }
   ],
   "paths": {
+    "/generos": {
+      "get": {
+        "tags": ["Gêneros"],
+        "summary": "Lista gêneros",
+        "description": "Lista gêneros com paginação e filtros por nome ou descrição.",
+        "parameters": [
+          { "$ref": "#/components/parameters/Page" },
+          { "$ref": "#/components/parameters/Limit" },
+          {
+            "name": "nome",
+            "in": "query",
+            "description": "Filtra gêneros por trecho do nome.",
+            "required": false,
+            "schema": { "type": "string", "example": "poe" }
+          },
+          {
+            "name": "descricao",
+            "in": "query",
+            "description": "Filtra gêneros por trecho da descrição.",
+            "required": false,
+            "schema": { "type": "string", "example": "verso" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de gêneros",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ListaGeneros" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Gêneros"],
+        "summary": "Cria um gênero",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GeneroCreate" },
+              "example": {
+                "nome": "Poesia",
+                "descricao": "Obras em verso."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Gênero criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Genero" }
+              }
+            }
+          },
+          "409": {
+            "description": "Nome de gênero já cadastrado",
+            "content": {
+              "application/json": {
+                "example": { "erro": "Registro duplicado", "campos": ["nome"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generos/{id}": {
+      "get": {
+        "tags": ["Gêneros"],
+        "summary": "Busca gênero por ID",
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "responses": {
+          "200": {
+            "description": "Gênero encontrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Genero" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFoundGenero" }
+        }
+      },
+      "put": {
+        "tags": ["Gêneros"],
+        "summary": "Atualiza completamente um gênero",
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GeneroCreate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gênero atualizado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Genero" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFoundGenero" }
+        }
+      },
+      "patch": {
+        "tags": ["Gêneros"],
+        "summary": "Atualiza parcialmente um gênero",
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GeneroUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gênero atualizado parcialmente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Genero" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFoundGenero" }
+        }
+      },
+      "delete": {
+        "tags": ["Gêneros"],
+        "summary": "Remove um gênero",
+        "description": "Livros associados a este gênero ficam com `genero_id = NULL` (ON DELETE SET NULL).",
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "responses": {
+          "204": { "description": "Gênero removido com sucesso" },
+          "404": { "$ref": "#/components/responses/NotFoundGenero" }
+        }
+      }
+    },
     "/usuarios": {
       "get": {
         "tags": ["Usuários"],
@@ -143,7 +286,6 @@
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequestValidacao" },
           "404": { "$ref": "#/components/responses/NotFoundUsuario" }
         }
       },
@@ -168,7 +310,6 @@
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequestValidacao" },
           "404": { "$ref": "#/components/responses/NotFoundUsuario" }
         }
       },
@@ -186,7 +327,7 @@
       "get": {
         "tags": ["Livros"],
         "summary": "Lista livros",
-        "description": "Lista livros com paginação e filtros por título, editora ou ISBN. O retorno inclui o gênero (objeto) e a lista de autores (N:N).",
+        "description": "Lista livros com paginação e filtros. O retorno inclui o gênero (objeto) e a lista de autores (N:N). O filtro `genero` busca por trecho do **nome** do gênero (case-insensitive), fazendo join com a tabela `generos`.",
         "parameters": [
           { "$ref": "#/components/parameters/Page" },
           { "$ref": "#/components/parameters/Limit" },
@@ -210,6 +351,13 @@
             "description": "Filtra por trecho do ISBN.",
             "required": false,
             "schema": { "type": "string", "example": "97885" }
+          },
+          {
+            "name": "genero",
+            "in": "query",
+            "description": "Filtra livros por trecho do nome do gênero (join com `generos`).",
+            "required": false,
+            "schema": { "type": "string", "example": "romance" }
           }
         ],
         "responses": {
@@ -297,7 +445,6 @@
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequestValidacao" },
           "404": { "$ref": "#/components/responses/NotFoundLivro" }
         }
       },
@@ -322,7 +469,6 @@
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequestValidacao" },
           "404": { "$ref": "#/components/responses/NotFoundLivro" }
         }
       },
@@ -340,7 +486,6 @@
       "get": {
         "tags": ["Autores"],
         "summary": "Lista autores de um livro",
-        "description": "Retorna os autores associados ao livro via tabela `livros_autores`.",
         "parameters": [{ "$ref": "#/components/parameters/Id" }],
         "responses": {
           "200": {
@@ -378,25 +523,19 @@
           "201": {
             "description": "Associação criada",
             "content": {
-              "application/json": {
-                "example": { "livro_id": 1, "autor_id": 5 }
-              }
+              "application/json": { "example": { "livro_id": 1, "autor_id": 5 } }
             }
           },
           "400": {
             "description": "autor_id inválido, ou livro/autor não existem",
             "content": {
-              "application/json": {
-                "example": { "erro": "livro_id ou autor_id não existe" }
-              }
+              "application/json": { "example": { "erro": "livro_id ou autor_id não existe" } }
             }
           },
           "409": {
             "description": "Autor já associado a este livro",
             "content": {
-              "application/json": {
-                "example": { "erro": "Autor já associado a este livro" }
-              }
+              "application/json": { "example": { "erro": "Autor já associado a este livro" } }
             }
           }
         }
@@ -419,9 +558,7 @@
           "404": {
             "description": "Associação não encontrada",
             "content": {
-              "application/json": {
-                "example": { "erro": "Associação não encontrada" }
-              }
+              "application/json": { "example": { "erro": "Associação não encontrada" } }
             }
           }
         }
@@ -464,9 +601,7 @@
           "404": {
             "description": "Livro não encontrado na view",
             "content": {
-              "application/json": {
-                "example": { "erro": "Livro não encontrado" }
-              }
+              "application/json": { "example": { "erro": "Livro não encontrado" } }
             }
           }
         }
@@ -535,11 +670,7 @@
               "application/json": {
                 "examples": {
                   "validacao": {
-                    "value": {
-                      "erros": [
-                        { "campo": "livro_id", "mensagem": "livro_id é obrigatório" }
-                      ]
-                    }
+                    "value": { "erros": [ { "campo": "livro_id", "mensagem": "livro_id é obrigatório" } ] }
                   },
                   "semExemplar": {
                     "value": { "erro": "Sem exemplares disponíveis para este livro" }
@@ -644,9 +775,7 @@
           "400": {
             "description": "Empréstimo não encontrado ou já devolvido",
             "content": {
-              "application/json": {
-                "example": { "erro": "Empréstimo já devolvido" }
-              }
+              "application/json": { "example": { "erro": "Empréstimo já devolvido" } }
             }
           }
         }
@@ -661,9 +790,7 @@
           "200": {
             "description": "Quantidade de empréstimos marcados",
             "content": {
-              "application/json": {
-                "example": { "marcados": 2 }
-              }
+              "application/json": { "example": { "marcados": 2 } }
             }
           }
         }
@@ -710,25 +837,25 @@
       "NotFoundUsuario": {
         "description": "Usuário não encontrado",
         "content": {
-          "application/json": {
-            "example": { "message": "Usuário não encontrado" }
-          }
+          "application/json": { "example": { "message": "Usuário não encontrado" } }
         }
       },
       "NotFoundLivro": {
         "description": "Livro não encontrado",
         "content": {
-          "application/json": {
-            "example": { "message": "Livro não encontrado" }
-          }
+          "application/json": { "example": { "message": "Livro não encontrado" } }
+        }
+      },
+      "NotFoundGenero": {
+        "description": "Gênero não encontrado",
+        "content": {
+          "application/json": { "example": { "message": "Gênero não encontrado" } }
         }
       },
       "NotFoundEmprestimo": {
         "description": "Empréstimo não encontrado",
         "content": {
-          "application/json": {
-            "example": { "message": "Empréstimo não encontrado" }
-          }
+          "application/json": { "example": { "message": "Empréstimo não encontrado" } }
         }
       }
     },
@@ -766,9 +893,7 @@
         }
       },
       "UsuarioUpdate": {
-        "allOf": [
-          { "$ref": "#/components/schemas/UsuarioCreate" }
-        ],
+        "allOf": [{ "$ref": "#/components/schemas/UsuarioCreate" }],
         "description": "Todos os campos são opcionais (PATCH)."
       },
       "ListaUsuarios": {
@@ -786,7 +911,29 @@
         "properties": {
           "id": { "type": "integer", "example": 8 },
           "nome": { "type": "string", "example": "Literatura Brasileira" },
+          "descricao": { "type": "string", "nullable": true, "example": "Obras clássicas e modernas de autores brasileiros." }
+        }
+      },
+      "GeneroCreate": {
+        "type": "object",
+        "required": ["nome"],
+        "properties": {
+          "nome": { "type": "string", "minLength": 1, "maxLength": 60 },
           "descricao": { "type": "string", "nullable": true }
+        }
+      },
+      "GeneroUpdate": {
+        "allOf": [{ "$ref": "#/components/schemas/GeneroCreate" }],
+        "description": "Todos os campos são opcionais (PATCH)."
+      },
+      "ListaGeneros": {
+        "type": "object",
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Genero" }
+          },
+          "paginacao": { "$ref": "#/components/schemas/Paginacao" }
         }
       },
       "Autor": {
@@ -838,9 +985,7 @@
         }
       },
       "LivroUpdate": {
-        "allOf": [
-          { "$ref": "#/components/schemas/LivroCreate" }
-        ],
+        "allOf": [{ "$ref": "#/components/schemas/LivroCreate" }],
         "description": "Todos os campos são opcionais (PATCH)."
       },
       "ListaLivros": {
@@ -895,6 +1040,10 @@
           "dados": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/Emprestimo" }
-          }
+          },
+          "paginacao": { "$ref": "#/components/schemas/Paginacao" }
         }
       }
+    }
+  }
+}
