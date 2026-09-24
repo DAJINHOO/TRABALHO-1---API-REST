@@ -16,4 +16,12 @@ export const disponibilidadeRepository = {
     `
     return linha ?? null
   },
+   exemplaresDisponiveis: async (livroId) => {
+    const [linha] = await prisma.$queryRaw`
+      SELECT exemplares_disponiveis
+      FROM vw_disponibilidade_livros
+      WHERE id = ${livroId}
+    `
+    return linha?.exemplares_disponiveis ?? null
+  },
 }
